@@ -12,7 +12,7 @@ async function main(){
     await paymentProcessor.waitForDeployment();
     const paymentProcessorAddress = await paymentProcessor.getAddress();
 
-    console.log("Contato PaymentProcessor desplegado en:", paymentProcessorAddress);
+    console.log("Contrato PaymentProcessor desplegado en:", paymentProcessorAddress);
 }
 
 main().catch((error) => {

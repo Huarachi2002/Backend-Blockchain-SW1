@@ -7,7 +7,7 @@ const app = express();
 
 app.use(bodyParser.json());
 
-const provider = new ethers.JsonRpcApiProvider(process.env.SEPOLIA_RPC_URL);
+const provider = new ethers.JsonRpcProvider(process.env.LOCAL_RPC_URL); //process.env.SEPOLIA_RPC_URL 
 const privateKey = process.env.PRIVATE_KEY;
 const wallet = new ethers.Wallet(privateKey, provider);
 const paymentProcessorAddress = process.env.PAYMENT_PROCESSOR_ADDRESS;
@@ -23,7 +23,7 @@ const paymentProcessor = new ethers.Contract(paymentProcessorAddress, paymentPro
 // Ruta para procesar el pago
 app.post('/process-payment', async (req, res) => {
     try {
-        const { userWallet, tokenAddress, amount, paymentId } = req.body;	
+        const { tokenAddress, amount, paymentId } = req.body;	
 
         // Crear transacion para procesar el pago
         const tx = await paymentProcessor
@@ -38,13 +38,13 @@ app.post('/process-payment', async (req, res) => {
     }
 });
 
-app.get('/listen-payments', async (req, res => {
+app.get('/listen-payments', async (req, res) => {
     paymentProcessor.on("PaymentProcessed", (user, token, amount, paymentId, timestamp) => {
         console.log(`Pago recibido: ${amount} de ${user} usando ${token}`);
     })
 
     res.send("Escuchando enventos de pagos");
-}))
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Servidor escuchando en el puerto ${PORT}`));

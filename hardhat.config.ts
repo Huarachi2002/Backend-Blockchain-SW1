@@ -10,7 +10,7 @@ const config: HardhatUserConfig = {
     solidity: "0.8.20",
     networks: {
       hardhat: {
-        chainId: 1337,
+        chainId: 31337,
       },
       sepolia: {
         url: SEPOLIA_RPC_URL,

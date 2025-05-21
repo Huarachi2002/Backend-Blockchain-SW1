@@ -14,7 +14,7 @@ contract PaymentProcessor is Ownable {
     );
 
     constructor(address owner) Ownable(owner) {
-        // Constructor logic if needed
+        require(owner != address(0), "Direccion del propietario no puede ser cero");
     }
 
     /**
