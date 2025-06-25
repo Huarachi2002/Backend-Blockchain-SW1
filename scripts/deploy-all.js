@@ -25,6 +25,33 @@ async function main(){
     const processorAddress = await paymentProcessor.getAddress();
     console.log("PaymentProcessor desplegado en:", processorAddress);
 
-    //4. Aprobar tokens
-    console.log()
+    console.log("\n📝 Actualizando archivo .env...");
+    const envPath = './.env';
+    let envContent = fs.readFileSync(envPath, 'utf8');
+    
+    // Actualizar direcciones
+    envContent = envContent.replace(
+        /PAYMENT_PROCESSOR_ADDRESS=.*/,
+        `PAYMENT_PROCESSOR_ADDRESS=${processorAddress}`
+    );
+    
+    if (envContent.includes('TEST_TOKEN_ADDRESS=')) {
+        envContent = envContent.replace(
+            /TEST_TOKEN_ADDRESS=.*/,
+            `TEST_TOKEN_ADDRESS=${tokenAddress}`
+        );
+    } else {
+        envContent += `\nTEST_TOKEN_ADDRESS=${tokenAddress}`;
+    }
+    
+    fs.writeFileSync(envPath, envContent);
+    console.log("✅ Archivo .env actualizado");
+
 }
+
+main()
+    .then(() => process.exit(0))
+    .catch((error) => {
+        console.error("❌ Error en el despliegue:", error);
+        process.exit(1);
+    });

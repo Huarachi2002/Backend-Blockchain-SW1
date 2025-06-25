@@ -19,7 +19,7 @@ contract PaymentProcessor is Ownable, ReentrancyGuard {
         address indexed toAddress,
         uint256 cryptoAmount,
         string cryptoType,
-        uint256 bolivianosAmount,
+        uint256 amount,
         string exchangeId,
         uint256 timestamp
     );
@@ -28,7 +28,7 @@ contract PaymentProcessor is Ownable, ReentrancyGuard {
         address indexed toAddress,
         uint256 cryptoAmount,
         string cryptoType,
-        uint256 bolivianosAmount,
+        uint256 amount,
         string withdrawalId,
         uint256 timestamp
     );
@@ -67,12 +67,12 @@ contract PaymentProcessor is Ownable, ReentrancyGuard {
         address toAddress,
         uint256 cryptoAmount,
         string memory cryptoType,
-        uint256 bolivianosAmount,
+        uint256 amount,
         string memory exchangeId
     ) external onlyOwner nonReentrant {
         require(!processedExchanges[exchangeId], "Exchange already processed");
         require(cryptoAmount > 0, "Crypto amount must be greater than 0");
-        require(bolivianosAmount > 0, "Bolivianos amount must be greater than 0");
+        require(amount > 0, "Bolivianos amount must be greater than 0");
         
         // Marcar como procesado
         processedExchanges[exchangeId] = true;
@@ -84,7 +84,7 @@ contract PaymentProcessor is Ownable, ReentrancyGuard {
             toAddress,
             cryptoAmount,
             cryptoType,
-            bolivianosAmount,
+            amount,
             exchangeId,
             block.timestamp
         );
@@ -95,12 +95,12 @@ contract PaymentProcessor is Ownable, ReentrancyGuard {
         address toAddress,
         uint256 cryptoAmount,
         string memory cryptoType,
-        uint256 bolivianosAmount,
+        uint256 amount,
         string memory withdrawalId
     ) external onlyOwner nonReentrant {
         require(!processedWithdrawals[withdrawalId], "Withdrawal already processed");
         require(cryptoAmount > 0, "Crypto amount must be greater than 0");
-        require(bolivianosAmount > 0, "Bolivianos amount must be greater than 0");
+        require(amount > 0, "Bolivianos amount must be greater than 0");
         
         // Marcar como procesado
         processedWithdrawals[withdrawalId] = true;
@@ -111,7 +111,7 @@ contract PaymentProcessor is Ownable, ReentrancyGuard {
             toAddress,
             cryptoAmount,
             cryptoType,
-            bolivianosAmount,
+            amount,
             withdrawalId,
             block.timestamp
         );

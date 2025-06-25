@@ -15,11 +15,12 @@ const paymentProcessorAddress = process.env.PAYMENT_PROCESSOR_ADDRESS;
 // ABI del contrato PaymentProcessor
 const paymentProcessorABI = [
     "event PaymentProcessed(address indexed user, address indexed token, uint256 amount, string paymentId, uint256 timestamp)",
-    "event ExchangeProcessed(address indexed fromAddress, address indexed toAddress, uint256 cryptoAmount, string cryptoType, uint256 bolivianosAmount, string exchangeId, uint256 timestamp)",
-    "event WithdrawalProcessed(address indexed toAddress, uint256 cryptoAmount, string cryptoType, uint256 bolivianosAmount, string withdrawalId, uint256 timestamp)",
+    "event ExchangeProcessed(address indexed fromAddress, address indexed toAddress, uint256 cryptoAmount, string cryptoType, uint256 amount, string exchangeId, uint256 timestamp)",
+    "event WithdrawalProcessed(address indexed toAddress, uint256 cryptoAmount, string cryptoType, uint256 amount, string withdrawalId, uint256 timestamp)",
     "function processPayment(address token, uint256 amount, string memory paymentId) external",
-    "function processExchange(address fromAddress, address toAddress, uint256 cryptoAmount, string memory cryptoType, uint256 bolivianosAmount, string memory exchangeId) external",
-    "function processWithdrawal(address toAddress, uint256 cryptoAmount, string memory cryptoType, uint256 bolivianosAmount, string memory withdrawalId) external",
+    "function processExchange(address fromAddress, address toAddress, uint256 cryptoAmount, string memory cryptoType, uint256 amount, string memory exchangeId) external",
+    "function processWithdrawal(address toAddress, uint256 cryptoAmount, string memory cryptoType, uint256 amount, string memory withdrawalId) external",
+    "function owner() external view returns (address)"
 ];
 
 const paymentProcessor = new ethers.Contract(paymentProcessorAddress, paymentProcessorABI, wallet);
@@ -51,12 +52,12 @@ app.post('/process-payment', async (req, res) => {
     }
 });
 
-// RUTA: Procesar exchange cripto → bolivianos (NUEVA)
+// RUTA: Procesar exchange cripto → bolivianos
 app.post('/process-exchange', async (req, res) => {
     try {
-        const { fromAddress, toAddress, cryptoAmount, cryptoType, bolivianosAmount, exchangeId } = req.body;
+        const { fromAddress, toAddress, cryptoAmount, cryptoType, amount, exchangeId } = req.body;
 
-        console.log(`Procesando exchange: ${cryptoAmount} ${cryptoType} → ${bolivianosAmount} BOB`);
+        console.log(`Procesando exchange: ${cryptoAmount} ${cryptoType} → ${amount} Divisa Pais`);
 
         // En un escenario real, aquí harías:
         // 1. Verificar que el usuario tenga suficientes tokens
@@ -70,7 +71,7 @@ app.post('/process-exchange', async (req, res) => {
                 toAddress,
                 ethers.parseUnits(cryptoAmount.toString(), 18),
                 cryptoType,
-                ethers.parseUnits(bolivianosAmount.toString(), 18),
+                ethers.parseUnits(amount.toString(), 18),
                 exchangeId
             );
 
@@ -83,7 +84,7 @@ app.post('/process-exchange', async (req, res) => {
             success: true, 
             txHash: tx.hash,
             gasFee: parseFloat(ethers.formatEther(gasFee)),
-            exchangeRate: bolivianosAmount / cryptoAmount
+            exchangeRate: amount / cryptoAmount
         });
     } catch (error) {
         console.error('Error procesando exchange:', error);
@@ -94,9 +95,9 @@ app.post('/process-exchange', async (req, res) => {
 // RUTA: Procesar retiro bolivianos → cripto (NUEVA)
 app.post('/process-withdrawal', async (req, res) => {
     try {
-        const { toAddress, cryptoAmount, cryptoType, bolivianosAmount, withdrawalId } = req.body;
+        const { toAddress, cryptoAmount, cryptoType, amount, withdrawalId } = req.body;
 
-        console.log(`Procesando retiro: ${bolivianosAmount} BOB → ${cryptoAmount} ${cryptoType} a ${toAddress}`);
+        console.log(`Procesando retiro: ${amount} DIVISA PAIS → ${cryptoAmount} ${cryptoType} a ${toAddress}`);
 
         // En un escenario real, aquí harías:
         // 1. Verificar que la aplicación tenga suficientes tokens
@@ -109,7 +110,7 @@ app.post('/process-withdrawal', async (req, res) => {
                 toAddress,
                 ethers.parseUnits(cryptoAmount.toString(), 18),
                 cryptoType,
-                ethers.parseUnits(bolivianosAmount.toString(), 18),
+                ethers.parseUnits(amount.toString(), 18),
                 withdrawalId
             );
 
@@ -122,7 +123,7 @@ app.post('/process-withdrawal', async (req, res) => {
             success: true, 
             txHash: tx.hash,
             gasFee: parseFloat(ethers.formatEther(gasFee)),
-            exchangeRate: cryptoAmount / bolivianosAmount
+            exchangeRate: cryptoAmount / amount
         });
     } catch (error) {
         console.error('Error procesando retiro:', error);
@@ -159,14 +160,14 @@ app.get('/listen-payments', async (req, res) => {
     });
 
     // Listener para exchanges
-    paymentProcessor.on("ExchangeProcessed", (fromAddress, toAddress, cryptoAmount, cryptoType, bolivianosAmount, exchangeId, timestamp) => {
-        console.log(`💱 Exchange procesado: ${ethers.formatUnits(cryptoAmount, 18)} ${cryptoType} → ${ethers.formatUnits(bolivianosAmount, 18)} BOB`);
+    paymentProcessor.on("ExchangeProcessed", (fromAddress, toAddress, cryptoAmount, cryptoType, amount, exchangeId, timestamp) => {
+        console.log(`💱 Exchange procesado: ${ethers.formatUnits(cryptoAmount, 18)} ${cryptoType} → ${ethers.formatUnits(amount, 18)} BOB`);
         console.log(`📋 Exchange ID: ${exchangeId}`);
     });
 
     // Listener para retiros
-    paymentProcessor.on("WithdrawalProcessed", (toAddress, cryptoAmount, cryptoType, bolivianosAmount, withdrawalId, timestamp) => {
-        console.log(`💰 Retiro procesado: ${ethers.formatUnits(bolivianosAmount, 18)} BOB → ${ethers.formatUnits(cryptoAmount, 18)} ${cryptoType}`);
+    paymentProcessor.on("WithdrawalProcessed", (toAddress, cryptoAmount, cryptoType, amount, withdrawalId, timestamp) => {
+        console.log(`💰 Retiro procesado: ${ethers.formatUnits(amount, 18)} BOB → ${ethers.formatUnits(cryptoAmount, 18)} ${cryptoType}`);
         console.log(`📋 Withdrawal ID: ${withdrawalId}`);
     });
 
