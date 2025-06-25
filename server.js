@@ -99,11 +99,6 @@ app.post('/process-withdrawal', async (req, res) => {
 
         console.log(`Procesando retiro: ${amount} DIVISA PAIS → ${cryptoAmount} ${cryptoType} a ${toAddress}`);
 
-        // En un escenario real, aquí harías:
-        // 1. Verificar que la aplicación tenga suficientes tokens
-        // 2. Transferir tokens de la aplicación al usuario/entidad
-        // 3. Registrar el retiro en el contrato
-
         const tx = await paymentProcessor
             .connect(wallet)
             .processWithdrawal(
@@ -172,6 +167,18 @@ app.get('/listen-payments', async (req, res) => {
     });
 
     res.send("Escuchando eventos de pagos, exchanges y retiros");
+});
+
+// Añadir este endpoint para healthchecks
+app.get('/health', (req, res) => {
+    res.json({
+        status: 'OK',
+        timestamp: new Date().toISOString(),
+        services: {
+            blockchain: 'online',
+            api: 'online'
+        }
+    });
 });
 
 const PORT = process.env.PORT || 3002;

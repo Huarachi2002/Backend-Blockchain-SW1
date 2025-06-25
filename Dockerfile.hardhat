@@ -1,0 +1,20 @@
+# Dockerfile.hardhat
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Instalar dependencias de Hardhat
+COPY package*.json ./
+RUN npm ci
+
+# Copiar contratos y configuración de Hardhat
+COPY contracts ./contracts
+COPY scripts ./scripts
+COPY hardhat.config.ts ./
+COPY tsconfig.json ./
+
+# Exponer puerto de Hardhat
+EXPOSE 8545
+
+# Comando para iniciar nodo Hardhat
+CMD ["npx", "hardhat", "node", "--hostname", "0.0.0.0"]

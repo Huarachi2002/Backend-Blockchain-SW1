@@ -11,12 +11,27 @@ const config: HardhatUserConfig = {
     networks: {
       hardhat: {
         chainId: 31337,
+        accounts: {
+          count: 20,
+          accountsBalance: "10000000000000000000000", // 10,000 ETH por cuenta
+        },
+        hostname: "0.0.0.0",
+        port: 8545
       },
       sepolia: {
         url: SEPOLIA_RPC_URL,
         accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
         chainId: 11155111,
       },
+      localhost: {
+        url: "http://127.0.0.1:8545",
+      },
+      ec2: {
+        url: `http://${process.env.EC2_PRIVATE_IP || "localhost"}:8545`,
+        chainId: 31337,
+        accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
+        timeout: 60000
+      }
     },
     paths: {
       sources: "./contracts",

@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  hardhat-node:
+    build:
+      context: .
+      dockerfile: Dockerfile.hardhat
+    container_name: hardhat-node
+    ports:
+      - "8545:8545"
+    volumes:
+      - hardhat_data:/app/data
+    networks:
+      - blockchain_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8545"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    
+  blockchain-api:
+    build: .
+    container_name: blockchain-api
+    depends_on:
+      - hardhat-node
+    ports:
+      - "3002:3002"
+    environment:
+      - PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+      - PAYMENT_PROCESSOR_ADDRESS=0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
+      - APP_WALLET_ADDRESS=0xdF68EE8cB29069042451Baa024b742e2B04AeB21
+      - SEPOLIA_RPC_URL=https://eth-sepolia.g.alchemy.com/v2/5p06_vJNFXsyQYh40vdI2_UTJ4zDoPv4
+      - LOCAL_RPC_URL=http://hardhat-node:8545
+      - PORT=3002
+      - TEST_TOKEN_ADDRESS=0x5FbDB2315678afecb367f032d93F642f64180aa3
+      - EC2_PRIVATE_IP=http://172.31.94.60:3002
+    env_file:
+      - .env
+    networks:
+      - blockchain_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+networks:
+  blockchain_network:
+    driver: bridge
+    name: backend-blockchain-sw1_blockchain_network  # Nombre para conexión externa
+
+volumes:
+  hardhat_data:
+  redis_data:
